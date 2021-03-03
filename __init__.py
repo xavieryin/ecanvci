@@ -1,2 +1,2 @@
-from ecanvci import *
-from helper import *
+from ecanvci.ecanvci import *
+from ecanvci.helper import *
