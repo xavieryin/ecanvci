@@ -1,4 +1,4 @@
-from ecanvci import *
+from .ecanvci import *
 import threading
 import queue
 import signal
@@ -54,9 +54,8 @@ class ECanVciHelper:
             self.t.join(timeout=0.1)
 
 
-
-# A simple usage demo
-if __name__ == "__main__":
+'''
+def _simple_demo():
     import time
 
     config=VciInitConfig(Mode=2)
@@ -75,3 +74,8 @@ if __name__ == "__main__":
     can.keep_running()
 
     print("main exit")
+
+
+if __name__ == "__main__":
+    _simple_demo()
+'''

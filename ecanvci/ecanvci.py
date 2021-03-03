@@ -1,4 +1,5 @@
-from common import *
+import pathlib
+from .common import *
 
 
 class VciInitConfig(StructureEx):
@@ -31,7 +32,7 @@ class VciCanObj(StructureEx):
 
 class VciDevice(WinDLL):
     # nDeviceType => 3: USNCAN-1, 4:USBCAN-2
-    def __init__(self, name='./ECanVci64.dll', nDeviceIdx=0, nDeviceType=3, nDeviceInd=0, nReserved=0, config=VciInitConfig()):
+    def __init__(self, name=f'{pathlib.Path(__file__).parent.absolute()}/ECanVci64.dll', nDeviceIdx=0, nDeviceType=3, nDeviceInd=0, nReserved=0, config=VciInitConfig()):
         super(VciDevice, self).__init__(name)
         assert(self.OpenDevice(nDeviceType, nDeviceInd, nReserved) == 1)
         assert(self.InitCAN(nDeviceType, nDeviceInd, 0, byref(config)) == 1)
@@ -65,11 +66,8 @@ class VciDevice(WinDLL):
     def receive_by_ref(self, obj_ref, len=1, waittime=0):
         return self.Receive(self.nDeviceType, self.nDeviceInd, self.nDeviceIdx, obj_ref, len, waittime)
 
-
-
-
-# A simple usage demo
-if __name__ == "__main__":
+'''
+def _simple_demo():
     device = VciDevice(config=VciInitConfig(Mode=2))    # Mode=2 means CAN bus self-loop
     
     obj = VciCanObj()
@@ -79,3 +77,8 @@ if __name__ == "__main__":
         ret, recv_msg = device.receive(waittime=-1)
         print(ret, recv_msg.ID, bytearray(recv_msg.Data), bytearray(obj.Data))
     device.close()
+
+
+if __name__ == "__main__":
+    _simple_demo()
+'''
