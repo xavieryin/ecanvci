@@ -1,4 +1,4 @@
-from ctypes import *
+from ctypes import Structure, LittleEndianStructure, memmove, addressof, sizeof
 
 
 class StructureEx(Structure):

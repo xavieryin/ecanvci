@@ -1,17 +1,20 @@
-from .ecanvci import *
+from .ecanvci import VciInitConfig, VciDevice, VciCanObj
+from ctypes import byref
 import threading
 import queue
 import signal
+import time
 
 
 class ECanVciHelper:
-    def __init__(self, config=VciInitConfig()):
+    def __init__(self, config=VciInitConfig(), log=False):
         def signal_handler(sig, frame):
             print('You pressed Ctrl+C!')
             self.stop()
 
         signal.signal(signal.SIGINT, signal_handler)
 
+        self.log = log
         self.device = VciDevice(config=config)
         self.evt = threading.Event()
         self.q = queue.Queue()
@@ -20,15 +23,17 @@ class ECanVciHelper:
         self.t.start()
 
     def thread_main(self):
-        recv_msg = VciCanObj(SendType=0)
         while not self.evt.is_set():
+            recv_msg = VciCanObj(SendType=0)
             while self.device.receive_by_ref(byref(recv_msg), 1, 0):
-                print(f"<<< {recv_msg.ID} {list(recv_msg.Data)}")
+                if self.log:
+                    print(f">>> {hex(recv_msg.ID)} {list(recv_msg.Data[:recv_msg.DataLen])}")
+                self.out_q.put(recv_msg)
             try:
                 msg = self.q.get(timeout=0.1)
                 assert(self.device.transmit_by_ref(byref(msg), 1) == 1)
-                print(f">>> {msg.ID} {list(msg.Data)}")
-                self.out_q.put(msg)
+                if self.log:
+                    print(f"<<< {hex(msg.ID)} {list(msg.Data[:msg.DataLen])}")
             except queue.Empty:
                 pass
         print("thread exit")
@@ -48,6 +53,17 @@ class ECanVciHelper:
 
     def recv(self, block=True, timeout=None):
         return self.out_q.get(block, timeout)
+
+    def clear_recv_queue(self):
+        try:
+            while self.out_q.get_nowait():
+                pass
+        except:
+            pass
+
+    def wait_for_send(self):
+        while not self.q.empty():
+            time.sleep(0.1)
 
     def keep_running(self):
         while self.t.is_alive():
