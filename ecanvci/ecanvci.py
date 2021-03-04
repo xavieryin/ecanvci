@@ -32,7 +32,7 @@ class VciCanObj(StructureEx):
 
 class VciDevice(WinDLL):
     # nDeviceType => 3: USNCAN-1, 4:USBCAN-2
-    def __init__(self, name=f'{pathlib.Path(__file__).parent.absolute()}/ECanVci64.dll', nDeviceIdx=0, nDeviceType=3, nDeviceInd=0, nReserved=0, config=VciInitConfig()):
+    def __init__(self, name=f'{pathlib.Path(__file__).parent.absolute()}/dll/ECanVci64.dll', nDeviceIdx=0, nDeviceType=3, nDeviceInd=0, nReserved=0, config=VciInitConfig()):
         super(VciDevice, self).__init__(name)
         assert(self.OpenDevice(nDeviceType, nDeviceInd, nReserved) == 1)
         assert(self.InitCAN(nDeviceType, nDeviceInd, 0, byref(config)) == 1)
