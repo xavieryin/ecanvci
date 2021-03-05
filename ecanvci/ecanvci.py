@@ -12,7 +12,7 @@ class VciInitConfig(StructureEx):
                 ("Timing1", c_ubyte),
                 ("Mode", c_ubyte)]  # 0: Normal, 1: Listen-only, 2: Self
 
-    def __init__(self, AccCode=0x00000000, AccMask=0xffffffff, Reserved=0, Filter=0, Timing0=0x01, Timing1=0x1C, Mode=0):
+    def __init__(self, AccCode=0x00000000, AccMask=0xffffffff, Reserved=0, Filter=0, Timing0=0x04, Timing1=0x1C, Mode=0):
         super(VciInitConfig, self).__init__(AccCode, AccMask, Reserved, Filter, Timing0, Timing1, Mode)
 
 
