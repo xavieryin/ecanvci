@@ -33,11 +33,12 @@ class ECanVciHelper:
                     logging.info(f">>> {hex(recv_msg.ID)} {list(recv_msg.Data[:recv_msg.DataLen])}")
                 self.out_q.put(recv_msg)
             try:
-                msg = self.q.get(timeout=0.1)
+                msg = self.q.get_nowait()
                 assert(self.device.transmit_by_ref(byref(msg), 1) == 1)
                 if self.log:
                     logging.info(f"<<< {hex(msg.ID)} {list(msg.Data[:msg.DataLen])}")
             except queue.Empty:
+                # time.sleep(0.001)
                 pass
         logging.info("thread exit")
 
@@ -49,23 +50,27 @@ class ECanVciHelper:
         self.device.close()
 
     def send(self, id=0, data=(0,)*8):
+        assert(not self.evt.is_set())
         self.q.put(VciCanObj(ID=id, Data=data, DataLen=len(data)))
 
     def send_vcicanobj(self, obj):
+        assert(not self.evt.is_set())
         self.q.put(obj)
 
     def recv(self, block=True, timeout=None):
+        if self.evt.is_set():
+            return None
         return self.out_q.get(block, timeout)
 
     def clear_recv_queue(self):
         try:
-            while self.out_q.get_nowait():
+            while (not self.evt.is_set()) and self.out_q.get_nowait():
                 pass
         except:
             pass
 
     def wait_for_send(self):
-        while not self.q.empty():
+        while (not self.evt.is_set()) and (not self.q.empty()):
             time.sleep(0.1)
 
     def keep_running(self):
