@@ -4,12 +4,15 @@ import threading
 import queue
 import signal
 import time
+import logging
+
+logging.basicConfig(level=logging.NOTSET, format='%(asctime)s %(message)s', datefmt='%H:%M:%S')
 
 
 class ECanVciHelper:
     def __init__(self, config=VciInitConfig(), log=False):
         def signal_handler(sig, frame):
-            print('You pressed Ctrl+C!')
+            logging.info('You pressed Ctrl+C!')
             self.stop()
 
         signal.signal(signal.SIGINT, signal_handler)
@@ -27,19 +30,19 @@ class ECanVciHelper:
             recv_msg = VciCanObj(SendType=0)
             while self.device.receive_by_ref(byref(recv_msg), 1, 0):
                 if self.log:
-                    print(f">>> {hex(recv_msg.ID)} {list(recv_msg.Data[:recv_msg.DataLen])}")
+                    logging.info(f">>> {hex(recv_msg.ID)} {list(recv_msg.Data[:recv_msg.DataLen])}")
                 self.out_q.put(recv_msg)
             try:
                 msg = self.q.get(timeout=0.1)
                 assert(self.device.transmit_by_ref(byref(msg), 1) == 1)
                 if self.log:
-                    print(f"<<< {hex(msg.ID)} {list(msg.Data[:msg.DataLen])}")
+                    logging.info(f"<<< {hex(msg.ID)} {list(msg.Data[:msg.DataLen])}")
             except queue.Empty:
                 pass
-        print("thread exit")
+        logging.info("thread exit")
 
     def stop(self):
-        print("stopping")
+        logging.info("stopping")
         self.evt.set()
         while self.t.is_alive():
             self.t.join(timeout=1)
@@ -77,7 +80,7 @@ def _simple_demo():
     config=VciInitConfig(Mode=2)
     can = ECanVciHelper(config=config)    # Mode=2 means CAN bus self-loop
 
-    print("press CTRL+C to exit")
+    logging.info("press CTRL+C to exit")
 
     for i in range(5):
         can.send(id=i)
@@ -85,11 +88,11 @@ def _simple_demo():
 
     for i in range(5):
         recv_msg = can.recv()
-        print(recv_msg.ID, bytearray(recv_msg.Data))
+        logging.info(recv_msg.ID, bytearray(recv_msg.Data))
 
     can.keep_running()
 
-    print("main exit")
+    logging.info("main exit")
 
 
 if __name__ == "__main__":
