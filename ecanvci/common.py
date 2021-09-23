@@ -1,6 +1,12 @@
 from ctypes import Structure, LittleEndianStructure, memmove, addressof, sizeof
 
 
+ECANVCI_TIMING0_100KBPS = 0x04
+ECANVCI_TIMING1_100KBPS = 0x1C
+ECANVCI_TIMING0_250KBPS = 0x01
+ECANVCI_TIMING1_250KBPS = 0x1C
+
+
 class StructureEx(Structure):
     '''Add easy-to-use method to set values to ctypes.structure
     '''

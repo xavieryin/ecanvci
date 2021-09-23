@@ -57,7 +57,9 @@ class VciDevice(WinDLL):
         ret = self.Receive(self.nDeviceType, self.nDeviceInd, self.nDeviceIdx, byref(recv_msg), 1, waittime)
         return ret, recv_msg
 
-    def receiveN(self, len=2, waittime=0):
+    def receiveN(self, len=0, waittime=0):
+        if len <= 0:
+            len = self.GetReceiveNum(self.nDeviceType, self.nDeviceInd, self.nDeviceIdx)
         recv_msg = VciCanObj * len
         for i in range(len):
             recv_msg[i].SendType = 0
